@@ -1,0 +1,33 @@
+
+@app.route('/test-rag')
+@doctor_required
+def test_rag():
+    """Test endpoint to see what RAG finds"""
+    patient_id = request.args.get('patient_id')
+    query = request.args.get('query', 'headache')
+    
+    if not patient_id:
+        return "Please provide patient_id"
+    
+    try:
+        results = rag_system.search_similar(
+            query=query,
+            patient_id=str(patient_id), # Ensure string for metadata match
+            limit=5
+        )
+        
+        html = "<h2>RAG Search Results</h2>"
+        html += f"<p>Query: '{query}'</p>"
+        html += "<hr>"
+        
+        if not results:
+             html += "<p>No results found.</p>"
+
+        for r in results:
+            html += f"<p><strong>Found:</strong> {r['text']}</p>"
+            html += f"<p><small>Metadata: {r['metadata']}</small></p>"
+            html += "<hr>"
+        
+        return html
+    except Exception as e:
+        return f"Error in RAG search: {str(e)}"

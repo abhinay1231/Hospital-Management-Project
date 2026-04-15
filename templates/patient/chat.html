@@ -1,0 +1,223 @@
+<!-- templates/patient/chat.html -->
+{% extends "base.html" %}
+
+{% block title %}AI Health Chat{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">AI Health Assistant 🤖</h1>
+            <p class="text-xl text-gray-600">Get instant health advice and symptom assessment</p>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-gray-100">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-6">
+                <div class="flex items-center">
+                    <div class="w-14 h-14 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-robot text-3xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-2xl font-bold">Medical AI Assistant</h2>
+                        <p class="text-sm text-blue-100 flex items-center">
+                            <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                            Online • Ready to help
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chatMessages" class="h-[500px] overflow-y-auto p-8 space-y-4 bg-gradient-to-br from-gray-50 to-blue-50">
+                {% if chat_history %}
+                    {% for chat in chat_history %}
+                    <!-- User Message -->
+                    <div class="flex justify-end animate-fade-in">
+                        <div class="max-w-xs lg:max-w-md">
+                            <div class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl rounded-tr-none px-6 py-4 shadow-lg">
+                                <p class="text-sm">{{ chat.message }}</p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2 text-right">{{ chat.timestamp.strftime('%H:%M') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- AI Response -->
+                    <div class="flex justify-start animate-fade-in">
+                        <div class="max-w-xs lg:max-w-md">
+                            <div class="bg-white border-2 border-gray-200 rounded-2xl rounded-tl-none px-6 py-4 shadow-lg">
+                                <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ chat.response }}</p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">{{ chat.timestamp.strftime('%H:%M') }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-20">
+                        <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto mb-6 transform rotate-12">
+                            <i class="fas fa-comments text-white text-5xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">Start a Conversation</h3>
+                        <p class="text-gray-600 max-w-md mx-auto">Ask me about your symptoms, health concerns, or general medical questions.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Chat Input -->
+            <div class="border-t-2 border-gray-100 p-6 bg-white">
+                <form id="chatForm" class="flex space-x-4">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Type your message here..." 
+                        class="flex-1 px-6 py-4 border-2 border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                        autocomplete="off"
+                    >
+                    <button 
+                        type="submit" 
+                        class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-4 rounded-2xl hover:shadow-xl transition-all transform hover:scale-105 font-bold"
+                        id="sendButton"
+                    >
+                        <i class="fas fa-paper-plane text-xl"></i>
+                    </button>
+                </form>
+                <p class="text-xs text-gray-500 mt-3 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    This AI provides general guidance. Always consult a doctor for serious concerns.
+                </p>
+            </div>
+        </div>
+
+        <!-- Quick Questions -->
+        <div class="mt-8 bg-white rounded-3xl shadow-xl p-8 border-2 border-gray-100">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-lightbulb mr-2 text-yellow-500"></i>Quick Questions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="sendQuickMessage(this.textContent)" class="text-left p-5 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all">
+                    <i class="fas fa-thermometer-half text-blue-600 text-xl mr-3"></i>
+                    <span class="text-sm text-gray-700 font-semibold">I have a fever and headache</span>
+                </button>
+                <button onclick="sendQuickMessage(this.textContent)" class="text-left p-5 border-2 border-gray-200 rounded-2xl hover:border-red-500 hover:shadow-lg transition-all">
+                    <i class="fas fa-heart text-red-600 text-xl mr-3"></i>
+                    <span class="text-sm text-gray-700 font-semibold">What are symptoms of high blood pressure?</span>
+                </button>
+                <button onclick="sendQuickMessage(this.textContent)" class="text-left p-5 border-2 border-gray-200 rounded-2xl hover:border-green-500 hover:shadow-lg transition-all">
+                    <i class="fas fa-apple-alt text-green-600 text-xl mr-3"></i>
+                    <span class="text-sm text-gray-700 font-semibold">What diet should I follow for diabetes?</span>
+                </button>
+                <button onclick="sendQuickMessage(this.textContent)" class="text-left p-5 border-2 border-gray-200 rounded-2xl hover:border-purple-500 hover:shadow-lg transition-all">
+                    <i class="fas fa-bed text-purple-600 text-xl mr-3"></i>
+                    <span class="text-sm text-gray-700 font-semibold">Tips for better sleep</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const chatForm = document.getElementById('chatForm');
+const messageInput = document.getElementById('messageInput');
+const chatMessages = document.getElementById('chatMessages');
+const sendButton = document.getElementById('sendButton');
+
+chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = messageInput.value.trim();
+    if (!message) return;
+    
+    addMessage(message, 'user');
+    messageInput.value = '';
+    
+    messageInput.disabled = true;
+    sendButton.disabled = true;
+    sendButton.innerHTML = '<i class="fas fa-spinner fa-spin text-xl"></i>';
+    
+    const loadingId = addMessage('Thinking...', 'ai', true);
+    
+    try {
+        const response = await fetch('{{ url_for("patient_chat") }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: message})
+        });
+        
+        const data = await response.json();
+        document.getElementById(loadingId)?.remove();
+        addMessage(data.response, 'ai');
+    } catch (error) {
+        document.getElementById(loadingId)?.remove();
+        addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+    } finally {
+        messageInput.disabled = false;
+        sendButton.disabled = false;
+        sendButton.innerHTML = '<i class="fas fa-paper-plane text-xl"></i>';
+        messageInput.focus();
+    }
+});
+
+function addMessage(text, sender, isLoading = false) {
+    const messageId = 'msg-' + Date.now();
+    const messageDiv = document.createElement('div');
+    messageDiv.id = messageId;
+    messageDiv.className = sender === 'user' ? 'flex justify-end animate-fade-in' : 'flex justify-start animate-fade-in';
+    
+    const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    
+    if (sender === 'user') {
+        messageDiv.innerHTML = `
+            <div class="max-w-xs lg:max-w-md">
+                <div class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl rounded-tr-none px-6 py-4 shadow-lg">
+                    <p class="text-sm">${escapeHtml(text)}</p>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 text-right">${time}</p>
+            </div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="max-w-xs lg:max-w-md">
+                <div class="bg-white border-2 border-gray-200 rounded-2xl rounded-tl-none px-6 py-4 shadow-lg">
+                    <p class="text-sm text-gray-900 whitespace-pre-wrap">${isLoading ? '<i class="fas fa-spinner fa-spin"></i> ' + escapeHtml(text) : escapeHtml(text)}</p>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">${time}</p>
+            </div>
+        `;
+    }
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    return messageId;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function sendQuickMessage(message) {
+    messageInput.value = message;
+    chatForm.dispatchEvent(new Event('submit'));
+}
+
+window.addEventListener('load', () => {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+</script>
+
+<style>
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+}
+</style>
+{% endblock %}

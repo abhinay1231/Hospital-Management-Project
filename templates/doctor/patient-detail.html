@@ -1,0 +1,403 @@
+<!-- templates/doctor/patient-detail.html -->
+{% extends "base.html" %}
+
+{% block title %}Patient Details - {{ patient.name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Back Button -->
+        <a href="{{ url_for('doctor_patients') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Patients
+        </a>
+
+        <!-- Patient Header -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="flex justify-between items-start">
+                <div class="flex items-center space-x-6">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-blue-600 text-4xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ patient.name }}</h1>
+                        <div class="mt-2 space-y-1">
+                            <p class="text-gray-600"><i class="fas fa-id-card mr-2"></i>Patient ID: #{{ patient.id }}</p>
+                            <p class="text-gray-600"><i class="fas fa-birthday-cake mr-2"></i>Age: {{ patient.age or 'N/A' }} | Gender: {{ patient.gender or 'N/A' }}</p>
+                            <p class="text-gray-600"><i class="fas fa-phone mr-2"></i>{{ patient.contact or 'N/A' }}</p>
+                            <p class="text-gray-600"><i class="fas fa-map-marker-alt mr-2"></i>{{ patient.address or 'N/A' }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-x-2">
+                    <button onclick="openEmailModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-envelope mr-2"></i>Send Email
+                    </button>
+                    <button onclick="openPrescriptionModal()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                        <i class="fas fa-prescription mr-2"></i>New Prescription
+                    </button>
+                </div>
+            </div>
+
+            <!-- Update Priority and Category -->
+            <form method="POST" action="{{ url_for('update_patient', patient_id=patient.id) }}" class="mt-6 grid grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Priority Level</label>
+                    <select name="priority_level" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="normal" {% if patient.priority_level == 'normal' %}selected{% endif %}>Normal</option>
+                        <option value="medium" {% if patient.priority_level == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if patient.priority_level == 'high' %}selected{% endif %}>High</option>
+                        <option value="critical" {% if patient.priority_level == 'critical' %}selected{% endif %}>Critical</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Disease Category</label>
+                    <input type="text" name="disease_category" value="{{ patient.disease_category or '' }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Update</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                    <button onclick="showTab('profile')" class="tab-button border-b-2 border-blue-600 py-4 px-1 text-sm font-medium text-blue-600">
+                        <i class="fas fa-user mr-2"></i>Profile
+                    </button>
+                    <button onclick="showTab('appointments')" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        <i class="fas fa-calendar mr-2"></i>Appointments
+                    </button>
+                    <button onclick="showTab('prescriptions')" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        <i class="fas fa-prescription mr-2"></i>Prescriptions
+                    </button>
+                    <button onclick="showTab('health')" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        <i class="fas fa-heartbeat mr-2"></i>Health Metrics
+                    </button>
+                    <button onclick="showTab('chat')" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        <i class="fas fa-comments mr-2"></i>Chat History
+                    </button>
+                    <button onclick="showTab('notes')" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        <i class="fas fa-sticky-note mr-2"></i>My Notes
+                    </button>
+                    <button onclick="showTab('reports')" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        <i class="fas fa-file-medical mr-2"></i>Reports
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="p-6">
+                <!-- Profile Tab -->
+                <div id="profile-tab" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Family History</h3>
+                            <p class="text-gray-700">{{ patient.family_history or 'Not provided' }}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Symptoms</h3>
+                            <p class="text-gray-700">{{ patient.symptoms or 'Not provided' }}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Diet</h3>
+                            <p class="text-gray-700">{{ patient.diet or 'Not provided' }}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Lifestyle</h3>
+                            <p class="text-gray-700">{{ patient.lifestyle or 'Not provided' }}</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Medical History</h3>
+                            <p class="text-gray-700">{{ patient.medical_history or 'Not provided' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Tab -->
+                <div id="appointments-tab" class="tab-content hidden">
+                    {% if appointments %}
+                    <div class="space-y-4">
+                        {% for apt in appointments %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-semibold text-gray-900">{{ apt.appointment_date }} at {{ apt.time_slot }}</p>
+                                    <p class="text-sm text-gray-600 mt-1">Reason: {{ apt.reason }}</p>
+                                    {% if apt.notes %}
+                                    <p class="text-sm text-gray-600 mt-1">Notes: {{ apt.notes }}</p>
+                                    {% endif %}
+                                </div>
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                    {% if apt.status == 'pending' %}text-yellow-800 bg-yellow-100
+                                    {% elif apt.status == 'confirmed' %}text-green-800 bg-green-100
+                                    {% elif apt.status == 'completed' %}text-blue-800 bg-blue-100
+                                    {% else %}text-red-800 bg-red-100{% endif %}">
+                                    {{ apt.status|capitalize }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-8">No appointments found</p>
+                    {% endif %}
+                </div>
+
+                <!-- Prescriptions Tab -->
+                <div id="prescriptions-tab" class="tab-content hidden">
+                    {% if prescriptions %}
+                    <div class="space-y-4">
+                        {% for presc in prescriptions %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-600">{{ presc.date_issued.strftime('%Y-%m-%d %H:%M') }}</p>
+                                    <p class="font-semibold text-gray-900 mt-1">Diagnosis: {{ presc.diagnosis or 'N/A' }}</p>
+                                    <div class="mt-2">
+                                        <p class="text-sm font-medium text-gray-700">Medicines:</p>
+                                        <p class="text-sm text-gray-600">{{ presc.medicines }}</p>
+                                    </div>
+                                    {% if presc.notes %}
+                                    <p class="text-sm text-gray-600 mt-2">Notes: {{ presc.notes }}</p>
+                                    {% endif %}
+                                </div>
+                                <a href="{{ url_for('download_prescription', prescription_id=presc.id) }}" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-8">No prescriptions found</p>
+                    {% endif %}
+                </div>
+
+                <!-- Health Metrics Tab -->
+                <div id="health-tab" class="tab-content hidden">
+                    {% if health_metrics %}
+                    <div class="space-y-4">
+                        {% for metric in health_metrics %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <p class="text-sm text-gray-600 mb-3">{{ metric.recorded_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {% if metric.blood_pressure_systolic %}
+                                <div>
+                                    <p class="text-xs text-gray-500">Blood Pressure</p>
+                                    <p class="text-lg font-semibold">{{ metric.blood_pressure_systolic }}/{{ metric.blood_pressure_diastolic }}</p>
+                                </div>
+                                {% endif %}
+                                {% if metric.heart_rate %}
+                                <div>
+                                    <p class="text-xs text-gray-500">Heart Rate</p>
+                                    <p class="text-lg font-semibold">{{ metric.heart_rate }} bpm</p>
+                                </div>
+                                {% endif %}
+                                {% if metric.blood_sugar %}
+                                <div>
+                                    <p class="text-xs text-gray-500">Blood Sugar</p>
+                                    <p class="text-lg font-semibold">{{ metric.blood_sugar }} mg/dL</p>
+                                </div>
+                                {% endif %}
+                                {% if metric.weight %}
+                                <div>
+                                    <p class="text-xs text-gray-500">Weight</p>
+                                    <p class="text-lg font-semibold">{{ metric.weight }} kg</p>
+                                </div>
+                                {% endif %}
+                                {% if metric.bmi %}
+                                <div>
+                                    <p class="text-xs text-gray-500">BMI</p>
+                                    <p class="text-lg font-semibold">{{ metric.bmi }}</p>
+                                </div>
+                                {% endif %}
+                                {% if metric.temperature %}
+                                <div>
+                                    <p class="text-xs text-gray-500">Temperature</p>
+                                    <p class="text-lg font-semibold">{{ metric.temperature }}°C</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-8">No health metrics recorded</p>
+                    {% endif %}
+                </div>
+
+                <!-- Chat History Tab -->
+                <div id="chat-tab" class="tab-content hidden">
+                    {% if chat_history %}
+                    <div class="space-y-4">
+                        {% for chat in chat_history %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <p class="text-xs text-gray-500 mb-2">{{ chat.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                            <div class="bg-blue-50 p-3 rounded-lg mb-2">
+                                <p class="text-sm font-medium text-gray-700">Patient:</p>
+                                <p class="text-sm text-gray-900">{{ chat.message }}</p>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="text-sm font-medium text-gray-700">AI Response:</p>
+                                <p class="text-sm text-gray-900">{{ chat.response }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-8">No chat history found</p>
+                    {% endif %}
+                </div>
+
+                <!-- Notes Tab -->
+                <div id="notes-tab" class="tab-content hidden">
+                    <form method="POST" action="{{ url_for('add_note', patient_id=patient.id) }}" class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Add New Note</label>
+                        <textarea name="note_content" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required></textarea>
+                        <button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-save mr-2"></i>Save Note
+                        </button>
+                    </form>
+
+                    {% if doctor_notes %}
+                    <div class="space-y-4">
+                        {% for note in doctor_notes %}
+                        <div class="border border-gray-200 rounded-lg p-4 bg-yellow-50">
+                            <p class="text-xs text-gray-500 mb-2">{{ note.note_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                            <p class="text-gray-900">{{ note.note_content }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-8">No notes yet</p>
+                    {% endif %}
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reports-tab" class="tab-content hidden">
+                    {% if reports %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for report in reports %}
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-900">{{ report.title }}</p>
+                                    <p class="text-sm text-gray-600 mt-1">{{ report.report_type }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ report.upload_date.strftime('%Y-%m-%d') }}</p>
+                                </div>
+                                <a href="{{ url_for('static', filename='uploads/' + report.file_path) }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-download text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-8">No reports uploaded</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Modal -->
+<div id="emailModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-900">Send Email to {{ patient.name }}</h3>
+            <button onclick="closeEmailModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <form method="POST" action="{{ url_for('send_patient_email', patient_id=patient.id) }}">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                <input type="text" name="subject" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                <textarea name="message" rows="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required></textarea>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeEmailModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-paper-plane mr-2"></i>Send Email
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Prescription Modal -->
+<div id="prescriptionModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-900">New Prescription for {{ patient.name }}</h3>
+            <button onclick="closePrescriptionModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <form method="POST" action="{{ url_for('prescribe', patient_id=patient.id) }}">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis</label>
+                <input type="text" name="diagnosis" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Medicines (one per line or JSON format)</label>
+                <textarea name="medicines" rows="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., Paracetamol 500mg - Twice daily" required></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+                <textarea name="notes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closePrescriptionModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    <i class="fas fa-prescription mr-2"></i>Create Prescription
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('border-blue-600', 'text-blue-600');
+        btn.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + '-tab').classList.remove('hidden');
+    
+    // Add active class to clicked button
+    event.target.closest('.tab-button').classList.remove('border-transparent', 'text-gray-500');
+    event.target.closest('.tab-button').classList.add('border-blue-600', 'text-blue-600');
+}
+
+function openEmailModal() {
+    document.getElementById('emailModal').classList.remove('hidden');
+}
+
+function closeEmailModal() {
+    document.getElementById('emailModal').classList.add('hidden');
+}
+
+function openPrescriptionModal() {
+    document.getElementById('prescriptionModal').classList.remove('hidden');
+}
+
+function closePrescriptionModal() {
+    document.getElementById('prescriptionModal').classList.add('hidden');
+}
+</script>
+{% endblock %}

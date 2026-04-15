@@ -1,0 +1,229 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RAG Hospital{% endblock %}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <!-- Navbar -->
+    {% if session.user_id %}
+    <nav class="bg-white shadow-xl sticky top-0 z-50 border-b-4 border-blue-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="{% if session.role == 'patient' %}{{ url_for('patient_dashboard') }}{% else %}{{ url_for('doctor_dashboard') }}{% endif %}"
+                        class="flex items-center group">
+                        <i
+                            class="fas fa-hospital text-blue-600 text-3xl mr-3 group-hover:scale-110 transition-transform"></i>
+                        <span
+                            class="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">RAG
+                            Hospital</span>
+                    </a>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    {% if session.role == 'patient' %}
+                    <a href="{{ url_for('patient_dashboard') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-home mr-1"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('patient_chat') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-robot mr-1"></i>AI Chat
+                    </a>
+                    <a href="{{ url_for('patient_appointments') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-calendar mr-1"></i>Appointments
+                    </a>
+                    <a href="{{ url_for('patient_prescriptions') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-prescription mr-1"></i>Prescriptions
+                    </a>
+                    <a href="{{ url_for('patient_health_metrics') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-heartbeat mr-1"></i>Health
+                    </a>
+                    <a href="{{ url_for('patient_reports') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-file-medical mr-1"></i>Reports
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('doctor_dashboard') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-home mr-1"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('doctor_patients') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-users mr-1"></i>Patients
+                    </a>
+                    <a href="{{ url_for('doctor_calendar') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-calendar mr-1"></i>Calendar
+                    </a>
+                    <a href="{{ url_for('ai_assistant') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-robot mr-1"></i>AI Assistant
+                    </a>
+                    <a href="{{ url_for('doctor_analytics') }}"
+                        class="nav-link text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-chart-bar mr-1"></i>Analytics
+                    </a>
+                    {% endif %}
+
+                    <div class="relative group inline-block">
+
+                        <!-- Profile Button -->
+                        <div class="flex items-center space-x-2 
+                                    bg-gradient-to-r from-blue-500 to-cyan-500 
+                                    text-white px-4 py-2 rounded-2xl 
+                                    cursor-pointer shadow-md
+                                    hover:shadow-xl transition-all duration-300">
+
+                            <div class="w-8 h-8 bg-white text-blue-600 
+                                        rounded-full flex items-center 
+                                        justify-center font-bold">
+                                {{ session['name'][0] }}
+                            </div>
+
+                            <span class="font-semibold">
+                                {{ session['name'] }}
+                            </span>
+
+                            <!-- Arrow -->
+                            <svg class="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none"
+                                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+
+                        <!-- Dropdown -->
+                        <div class="absolute right-0 top-full mt-2 w-44
+                                    bg-white/80 backdrop-blur-lg
+                                    shadow-xl rounded-2xl border border-gray-200
+                                    opacity-0 invisible translate-y-2
+                                    group-hover:opacity-100 
+                                    group-hover:visible 
+                                    group-hover:translate-y-0
+                                    transition-all duration-300
+                                    z-50">
+
+                            <a href="{{ url_for('logout') }}" class="flex items-center space-x-2 px-4 py-3 
+                                      text-gray-700 hover:bg-red-50 
+                                      hover:text-red-600 rounded-2xl 
+                                      transition-all duration-200">
+
+                                <!-- Logout Icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5
+                                             a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                                </svg>
+
+                                <span>Logout</span>
+                            </a>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        {% for category, message in messages %}
+        <div
+            class="mb-4 p-5 rounded-2xl border-2 {% if category == 'error' %}bg-red-50 text-red-700 border-red-200{% else %}bg-green-50 text-green-700 border-green-200{% endif %} shadow-lg animate-fade-in">
+            <div class="flex items-center">
+                <div
+                    class="w-10 h-10 rounded-full flex items-center justify-center mr-3 {% if category == 'error' %}bg-red-100{% else %}bg-green-100{% endif %}">
+                    <i
+                        class="fas {% if category == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} text-xl"></i>
+                </div>
+                <span class="font-semibold">{{ message }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-gray-900 to-gray-800 text-white mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-hospital text-blue-400 text-3xl mr-3"></i>
+                    <span class="text-2xl font-bold">RAG Hospital</span>
+                </div>
+                <p class="text-gray-400 mb-2">&copy; 2024 RAG Hospital. All rights reserved.</p>
+                <p class="text-sm text-gray-500">Powered by AI • Your Health, Our Priority</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

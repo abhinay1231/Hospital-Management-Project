@@ -1,0 +1,122 @@
+<!-- templates/doctor/patients.html -->
+{% extends "base.html" %}
+
+{% block title %}Patient Management{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Patient Management 👥</h1>
+            <p class="text-xl text-gray-600">Manage and monitor your patients</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-3xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-3">Search Patient</label>
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-5 top-4 text-gray-400"></i>
+                        <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Enter patient name..." class="w-full pl-14 pr-4 py-3 border-2 border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-semibold">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-3">Priority Level</label>
+                    <select name="priority" class="w-full px-4 py-3 border-2 border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-semibold">
+                        <option value="">All Priorities</option>
+                        <option value="critical" {% if request.args.get('priority') == 'critical' %}selected{% endif %}>Critical</option>
+                        <option value="high" {% if request.args.get('priority') == 'high' %}selected{% endif %}>High</option>
+                        <option value="medium" {% if request.args.get('priority') == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="normal" {% if request.args.get('priority') == 'normal' %}selected{% endif %}>Normal</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-3">Disease Category</label>
+                    <select name="category" class="w-full px-4 py-3 border-2 border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-semibold">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if request.args.get('category') == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-2xl hover:shadow-xl transition-all font-bold">
+                        <i class="fas fa-filter mr-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Patients List -->
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-gray-100">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gradient-to-r from-gray-50 to-blue-50">
+                        <tr>
+                            <th class="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Patient</th>
+                            <th class="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Age/Gender</th>
+                            <th class="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
+                            <th class="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Priority</th>
+                            <th class="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for patient in patients %}
+                        <tr class="hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-all">
+                            <td class="px-8 py-5 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-bold text-gray-900">{{ patient.name }}</div>
+                                        <div class="text-xs text-gray-500 font-semibold">ID: #{{ patient.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                {{ patient.age or 'N/A' }} / {{ patient.gender or 'N/A' }}
+                            </td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                {{ patient.contact or 'N/A' }}
+                            </td>
+                            <td class="px-8 py-5 whitespace-nowrap">
+                                {% if patient.priority_level == 'critical' %}
+                                <span class="px-4 py-2 text-xs font-bold text-red-700 bg-red-100 rounded-full border-2 border-red-300">Critical</span>
+                                {% elif patient.priority_level == 'high' %}
+                                <span class="px-4 py-2 text-xs font-bold text-orange-700 bg-orange-100 rounded-full border-2 border-orange-300">High</span>
+                                {% elif patient.priority_level == 'medium' %}
+                                <span class="px-4 py-2 text-xs font-bold text-yellow-700 bg-yellow-100 rounded-full border-2 border-yellow-300">Medium</span>
+                                {% else %}
+                                <span class="px-4 py-2 text-xs font-bold text-green-700 bg-green-100 rounded-full border-2 border-green-300">Normal</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                {{ patient.disease_category or 'N/A' }}
+                            </td>
+                            <td class="px-8 py-5 whitespace-nowrap text-sm font-bold">
+                                <a href="{{ url_for('patient_detail', patient_id=patient.id) }}" class="text-blue-600 hover:text-blue-900 inline-flex items-center">
+                                    <i class="fas fa-eye mr-2"></i>View Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not patients %}
+            <div class="text-center py-20">
+                <i class="fas fa-users text-gray-300 text-7xl mb-6"></i>
+                <p class="text-gray-500 text-2xl font-semibold">No patients found</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

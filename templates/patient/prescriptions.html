@@ -1,0 +1,64 @@
+<!-- templates/patient/prescriptions.html -->
+{% extends "base.html" %}
+
+{% block title %}My Prescriptions{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">My Prescriptions 💊</h1>
+            <p class="text-xl text-gray-600">View and download your prescriptions</p>
+        </div>
+
+        {% if prescriptions %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for prescription in prescriptions %}
+            <div class="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-green-500 transform hover:scale-105 duration-200">
+                <div class="p-8">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center transform -rotate-6">
+                            <i class="fas fa-prescription text-white text-3xl"></i>
+                        </div>
+                        <span class="text-xs text-gray-500 font-bold bg-gray-100 px-4 py-2 rounded-full">{{ prescription.date_issued.strftime('%Y-%m-%d') }}</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">{{ prescription.diagnosis or 'General Prescription' }}</h3>
+                    <p class="text-sm text-gray-600 mb-6 flex items-center">
+                        <i class="fas fa-user-md text-blue-600 mr-2"></i>
+                        <span class="font-semibold">Dr. {{ prescription.doctor.name }}</span>
+                    </p>
+                    
+                    <div class="border-t-2 border-gray-200 pt-6 mb-6">
+                        <p class="text-xs font-bold text-gray-700 mb-3 uppercase tracking-wide">Medicines:</p>
+                        <div class="text-sm text-gray-600 max-h-24 overflow-y-auto bg-gray-50 p-3 rounded-xl">
+                            {{ prescription.medicines }}
+                        </div>
+                    </div>
+                    
+                    {% if prescription.notes %}
+                    <div class="mb-6">
+                        <p class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Notes:</p>
+                        <p class="text-xs text-gray-600 bg-yellow-50 p-3 rounded-xl">{{ prescription.notes }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('download_prescription', prescription_id=prescription.id) }}" class="block w-full text-center bg-gradient-to-r from-green-500 to-emerald-500 text-white py-4 rounded-2xl hover:shadow-xl transition-all font-bold transform hover:scale-105">
+                        <i class="fas fa-download mr-2"></i>Download PDF
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-3xl shadow-xl p-20 text-center border-2 border-gray-100">
+            <div class="w-32 h-32 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-prescription text-white text-6xl"></i>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-4">No Prescriptions Yet</h3>
+            <p class="text-gray-600 text-lg">Your prescriptions will appear here after doctor consultations</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

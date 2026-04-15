@@ -1,0 +1,131 @@
+<!-- templates/patient/profile.html -->
+{% extends "base.html" %}
+
+{% block title %}Complete Profile{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Complete Your Profile</h1>
+            <p class="text-gray-600 mt-2">Help us provide better healthcare recommendations</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-medium text-gray-700">Step {{ step }} of 5</span>
+                <span class="text-sm font-medium text-gray-700">{{ (step * 20)|int }}% Complete</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: {{ (step * 20)|int }}%"></div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <form method="POST">
+                <input type="hidden" name="step" value="{{ step }}">
+
+                {% if step == 1 %}
+                <!-- Step 1: Basic Information -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                        <input type="number" name="age" value="{{ patient.age or '' }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                        <select name="gender" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>Female</option>
+                            <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+                        <input type="tel" name="contact" value="{{ patient.contact or '' }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                        <textarea name="address" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>{{ patient.address or '' }}</textarea>
+                    </div>
+                </div>
+
+                {% elif step == 2 %}
+                <!-- Step 2: Family History -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Family Medical History</label>
+                        <p class="text-sm text-gray-600 mb-2">Please describe any significant medical conditions in your family (diabetes, heart disease, cancer, etc.)</p>
+                        <textarea name="family_history" rows="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Example: Father has Type 2 diabetes, Mother had hypertension..." required>{{ patient.family_history or '' }}</textarea>
+                    </div>
+                </div>
+
+                {% elif step == 3 %}
+                <!-- Step 3: Current Symptoms -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Current Symptoms</label>
+                        <p class="text-sm text-gray-600 mb-2">Describe any symptoms or health concerns you're currently experiencing</p>
+                        <textarea name="symptoms" rows="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Example: Frequent headaches, fatigue, back pain..." required>{{ patient.symptoms or '' }}</textarea>
+                    </div>
+                </div>
+
+                {% elif step == 4 %}
+                <!-- Step 4: Diet & Lifestyle -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Diet Habits</label>
+                        <p class="text-sm text-gray-600 mb-2">Describe your typical diet and eating patterns</p>
+                        <textarea name="diet" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Example: Vegetarian, 3 meals a day, low carb..." required>{{ patient.diet or '' }}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Lifestyle</label>
+                        <p class="text-sm text-gray-600 mb-2">Describe your daily activities, exercise routine, sleep patterns, etc.</p>
+                        <textarea name="lifestyle" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Example: Sedentary job, exercise 3x/week, 6-7 hours sleep..." required>{{ patient.lifestyle or '' }}</textarea>
+                    </div>
+                </div>
+
+                {% elif step == 5 %}
+                <!-- Step 5: Medical History -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Complete Medical History</label>
+                        <p class="text-sm text-gray-600 mb-2">List any past illnesses, surgeries, chronic conditions, allergies, and current medications</p>
+                        <textarea name="medical_history" rows="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Example: Appendectomy 2015, Allergic to penicillin, Currently taking..." required>{{ patient.medical_history or '' }}</textarea>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Navigation Buttons -->
+                <div class="mt-8 flex justify-between">
+                    {% if step > 1 %}
+                    <a href="{{ url_for('patient_profile', step=step-1) }}" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        <i class="fas fa-arrow-left mr-2"></i>Previous
+                    </a>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                        {% if step == 5 %}
+                        Complete Profile <i class="fas fa-check ml-2"></i>
+                        {% else %}
+                        Next <i class="fas fa-arrow-right ml-2"></i>
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Step Indicators -->
+        <div class="mt-8 flex justify-center space-x-2">
+            {% for i in range(1, 6) %}
+            <div class="w-3 h-3 rounded-full {% if i <= step %}bg-blue-600{% else %}bg-gray-300{% endif %}"></div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,256 @@
+<!-- templates/patient/health-metrics.html -->
+{% extends "base.html" %}
+
+{% block title %}Health Metrics{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Health Metrics Dashboard 💓</h1>
+            <p class="text-xl text-gray-600">Track your vital signs and health measurements</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Add Metrics Form -->
+            <div class="lg:col-span-1 bg-white rounded-3xl shadow-xl p-8 border-2 border-gray-100 h-fit">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-plus-circle mr-2 text-blue-600"></i>Log New Metrics</h2>
+                <form method="POST" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Blood Pressure</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="number" name="bp_systolic" placeholder="Systolic" class="px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm font-semibold">
+                            <input type="number" name="bp_diastolic" placeholder="Diastolic" class="px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm font-semibold">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Heart Rate (bpm)</label>
+                        <input type="number" name="heart_rate" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Blood Sugar (mg/dL)</label>
+                        <input type="number" step="0.1" name="blood_sugar" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Weight (kg)</label>
+                        <input type="number" step="0.1" name="weight" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Height (cm)</label>
+                        <input type="number" step="0.1" name="height" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Temperature (°C)</label>
+                        <input type="number" step="0.1" name="temperature" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Oxygen Saturation (%)</label>
+                        <input type="number" name="oxygen_saturation" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold">
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-4 rounded-2xl hover:shadow-xl transition-all transform hover:scale-105 font-bold">
+                        <i class="fas fa-save mr-2"></i>Save Metrics
+                    </button>
+                </form>
+            </div>
+
+            <!-- Current Status & BMI -->
+            <div class="lg:col-span-2 space-y-8">
+                {% if latest_metric %}
+                <!-- Current Status -->
+                <div class="bg-white rounded-3xl shadow-xl p-8 border-2 border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-heartbeat mr-2 text-red-600"></i>Current Status</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {% if latest_metric.blood_pressure_systolic %}
+                        <div class="text-center p-6 bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl border-2 border-red-200">
+                            <i class="fas fa-heartbeat text-red-600 text-4xl mb-3"></i>
+                            <p class="text-xs text-gray-600 font-semibold mb-2">Blood Pressure</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ latest_metric.blood_pressure_systolic }}/{{ latest_metric.blood_pressure_diastolic }}</p>
+                        </div>
+                        {% endif %}
+                        {% if latest_metric.heart_rate %}
+                        <div class="text-center p-6 bg-gradient-to-br from-pink-50 to-red-50 rounded-2xl border-2 border-pink-200">
+                            <i class="fas fa-heart text-pink-600 text-4xl mb-3"></i>
+                            <p class="text-xs text-gray-600 font-semibold mb-2">Heart Rate</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ latest_metric.heart_rate }} bpm</p>
+                        </div>
+                        {% endif %}
+                        {% if latest_metric.blood_sugar %}
+                        <div class="text-center p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl border-2 border-yellow-200">
+                            <i class="fas fa-tint text-yellow-600 text-4xl mb-3"></i>
+                            <p class="text-xs text-gray-600 font-semibold mb-2">Blood Sugar</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ latest_metric.blood_sugar }} mg/dL</p>
+                        </div>
+                        {% endif %}
+                        {% if latest_metric.weight %}
+                        <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border-2 border-blue-200">
+                            <i class="fas fa-weight text-blue-600 text-4xl mb-3"></i>
+                            <p class="text-xs text-gray-600 font-semibold mb-2">Weight</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ latest_metric.weight }} kg</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- BMI Calculator -->
+                {% if latest_metric.bmi %}
+                <div class="bg-white rounded-3xl shadow-xl p-8 border-2 border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-calculator mr-2 text-purple-600"></i>BMI Analysis</h2>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-7xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{{ latest_metric.bmi }}</p>
+                            <p class="text-sm text-gray-600 mt-3 font-semibold">Body Mass Index</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-3xl font-bold mb-2
+                                {% if bmi_category == 'Underweight' %}text-yellow-600
+                                {% elif bmi_category == 'Normal' %}text-green-600
+                                {% elif bmi_category == 'Overweight' %}text-orange-600
+                                {% else %}text-red-600{% endif %}">
+                                {{ bmi_category }}
+                            </p>
+                            <p class="text-xs text-gray-500 font-semibold">Category</p>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <div class="h-6 bg-gradient-to-r from-yellow-400 via-green-500 to-red-600 rounded-full shadow-lg"></div>
+                        <div class="flex justify-between text-xs text-gray-600 mt-2 font-semibold">
+                            <span>Underweight</span>
+                            <span>Normal</span>
+                            <span>Overweight</span>
+                            <span>Obese</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Charts -->
+                <div class="bg-white rounded-3xl shadow-xl p-8 border-2 border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-chart-line mr-2 text-green-600"></i>Health Trends</h2>
+                    <canvas id="healthChart"></canvas>
+                </div>
+                {% else %}
+                <div class="bg-white rounded-3xl shadow-xl p-20 text-center border-2 border-gray-100">
+                    <div class="w-32 h-32 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-8">
+                        <i class="fas fa-chart-line text-white text-6xl"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-900 mb-4">No Metrics Recorded Yet</h3>
+                    <p class="text-gray-600 text-lg">Start logging your health metrics to track your progress</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- History -->
+        {% if metrics %}
+        <div class="mt-8 bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-gray-100">
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-8 py-6 border-b-2 border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-900"><i class="fas fa-history mr-2 text-purple-600"></i>History</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">BP</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Heart Rate</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Blood Sugar</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Weight</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">BMI</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for metric in metrics %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ metric.recorded_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if metric.blood_pressure_systolic %}{{ metric.blood_pressure_systolic }}/{{ metric.blood_pressure_diastolic }}{% else %}-{% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ metric.heart_rate or '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ metric.blood_sugar or '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ metric.weight or '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ metric.bmi or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% if metrics %}
+async function loadChartData() {
+    const response = await fetch('/api/health-metrics-data?days=30');
+    const data = await response.json();
+    
+    const ctx = document.getElementById('healthChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.dates,
+            datasets: [
+                {
+                    label: 'Weight (kg)',
+                    data: data.weight,
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                },
+                {
+                    label: 'BMI',
+                    data: data.bmi,
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+loadChartData();
+{% endif %}
+</script>
+{% endblock %}

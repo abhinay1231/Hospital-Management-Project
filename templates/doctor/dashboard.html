@@ -1,0 +1,195 @@
+<!-- templates/doctor/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen">
+    <!-- Header with Gradient -->
+    <div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-5xl font-bold mb-3">Welcome, Dr. {{ doctor.name }}! 👨‍⚕️</h1>
+                    <p class="text-xl text-purple-100">{{ doctor.specialization }}</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="{{ url_for('doctor_calendar') }}" class="bg-white text-purple-600 px-8 py-4 rounded-2xl hover:shadow-2xl transition-all transform hover:scale-105 font-bold">
+                        <i class="fas fa-calendar mr-2"></i>Calendar
+                    </a>
+                    <a href="{{ url_for('ai_assistant') }}" class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-4 rounded-2xl hover:shadow-2xl transition-all transform hover:scale-105 font-bold">
+                        <i class="fas fa-robot mr-2"></i>AI Assistant
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-transparent hover:border-blue-500 transition-all transform hover:scale-105">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-users text-white text-2xl"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm font-semibold mb-2">Total Patients</p>
+                <p class="text-4xl font-bold text-gray-900">{{ total_patients }}</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-transparent hover:border-green-500 transition-all transform hover:scale-105">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-calendar-check text-white text-2xl"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm font-semibold mb-2">Today's Appointments</p>
+                <p class="text-4xl font-bold text-gray-900">{{ today_appointments }}</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-transparent hover:border-yellow-500 transition-all transform hover:scale-105">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-clock text-white text-2xl"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm font-semibold mb-2">Pending</p>
+                <p class="text-4xl font-bold text-gray-900">{{ pending_appointments }}</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-transparent hover:border-red-500 transition-all transform hover:scale-105">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-white text-2xl"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm font-semibold mb-2">Critical Patients</p>
+                <p class="text-4xl font-bold text-gray-900">{{ critical_patients|length }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Recent Appointments -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100">
+                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 px-8 py-6 border-b-2 border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900"><i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Recent Appointments</h2>
+                </div>
+                <div class="p-8">
+                    {% if recent_appointments %}
+                    <div class="space-y-4">
+                        {% for appointment in recent_appointments %}
+                        <div class="flex items-center justify-between p-6 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-lg text-gray-900">{{ appointment.patient.name }}</p>
+                                    <p class="text-sm text-gray-600">{{ appointment.appointment_date }} at {{ appointment.time_slot }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ appointment.reason }}</p>
+                                </div>
+                            </div>
+                            <div>
+                                {% if appointment.status == 'pending' %}
+                                <span class="px-4 py-2 text-xs font-bold text-yellow-700 bg-yellow-100 rounded-full">Pending</span>
+                                {% elif appointment.status == 'confirmed' %}
+                                <span class="px-4 py-2 text-xs font-bold text-green-700 bg-green-100 rounded-full">Confirmed</span>
+                                {% elif appointment.status == 'completed' %}
+                                <span class="px-4 py-2 text-xs font-bold text-blue-700 bg-blue-100 rounded-full">Completed</span>
+                                {% else %}
+                                <span class="px-4 py-2 text-xs font-bold text-red-700 bg-red-100 rounded-full">Cancelled</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-12">No recent appointments</p>
+                    {% endif %}
+                    <div class="mt-6">
+                        <a href="{{ url_for('doctor_calendar') }}" class="text-blue-600 hover:text-blue-800 font-bold">
+                            View all appointments →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Critical Patients -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100">
+                <div class="bg-gradient-to-r from-red-50 to-pink-50 px-8 py-6 border-b-2 border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900"><i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>Critical Patients</h2>
+                </div>
+                <div class="p-8">
+                    {% if critical_patients %}
+                    <div class="space-y-4">
+                        {% for patient in critical_patients %}
+                        <a href="{{ url_for('patient_detail', patient_id=patient.id) }}" class="block p-6 border-l-4 border-red-500 bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl hover:shadow-lg transition-all">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-bold text-lg text-gray-900">{{ patient.name }}</p>
+                                    <p class="text-sm text-gray-600">Age: {{ patient.age }} | {{ patient.gender }}</p>
+                                    {% if patient.disease_category %}
+                                    <p class="text-xs text-gray-500 mt-1">{{ patient.disease_category }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="text-red-600">
+                                    <i class="fas fa-exclamation-circle text-3xl"></i>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-12">No critical patients</p>
+                    {% endif %}
+                    <div class="mt-6">
+                        <a href="{{ url_for('doctor_patients', priority='critical') }}" class="text-red-600 hover:text-red-800 font-bold">
+                            View all critical patients →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="{{ url_for('doctor_patients') }}" class="block bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-2xl shadow-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-users text-3xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold">Patient Management</h3>
+                        <p class="text-sm opacity-90">View and manage patients</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('doctor_analytics') }}" class="block bg-gradient-to-br from-green-500 to-emerald-500 text-white rounded-2xl shadow-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-chart-bar text-3xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold">Analytics</h3>
+                        <p class="text-sm opacity-90">View statistics & reports</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('ai_assistant') }}" class="block bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-2xl shadow-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-robot text-3xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold">AI Assistant</h3>
+                        <p class="text-sm opacity-90">Get AI-powered insights</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
